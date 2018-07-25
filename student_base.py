@@ -16,11 +16,14 @@ class Database:
             'filter_age': False,
             'age_min': 0,
             'age_max': 0,
-            'filter_pesel': True,
+            'filter_pesel': False,
             'pesel': ''
         }
 
-        self.load_student_database()
+        try:
+            self.load_student_database()
+        except FileNotFoundError:
+            print('File not found. Are you sure this destination \'', self.database_destination, '\' is correct?')
 
     def show_all_students(self, filter_on):
         filtered_students = {}
@@ -114,6 +117,14 @@ class Database:
                 print('|', student, '|', self.database[student]['name'], '|', self.database[student]['lastname'], '|',
                       self.database[student]['age'], '|', self.database[student]['pesel'], '|')
 
+    def show_student(self, idx):
+        try:
+            print('|ID|', '|NAME|', '|LAST NAME|', '|AGE|', '|PESEL|')
+            print('|', idx, '|', self.database[str(idx)]['name'], '|', self.database[str(idx)]['lastname'], '|',
+                  self.database[str(idx)]['age'], '|', self.database[str(idx)]['pesel'], '|')
+        except KeyError:
+            print("Student not found. Are you sure this ID is correct?")
+
     def create_new_student(self):
         student = {
             'name': '',
@@ -124,8 +135,14 @@ class Database:
 
         student['name'] = input('Insert student name: ')
         student['lastname'] = input('Insert student last name: ')
-        student['age'] = input('Insert student age: ')
-        student['pesel'] = input('Insert student pesel: ')
+        student['age'] = int(input('Insert student age: '))
+        student['pesel'] = str(input('Insert student pesel: '))
+        if 11 != len(student['pesel']) and student['pesel'] != '':
+            while True:
+                print('Invalid pesel. Try again.')
+                student['pesel'] = str(input('Insert student pesel: '))
+                if len(student['pesel']) == 11:
+                    break
         new_id = self.return_new_id()
         self.database[str(new_id)] = student
         self.save_student_database()
@@ -154,7 +171,13 @@ class Database:
                 name = input('Insert student name: ')
                 last_name = input('Insert student last name: ')
                 age = input('Insert student age: ')
-                pesel = input('Insert student pesel: ')
+                pesel = str(input('Insert student pesel: '))
+                if 11 != len(pesel) and pesel != '':
+                    while True:
+                        print('Invalid pesel. Try again.')
+                        pesel = str(input('Insert student pesel: '))
+                        if len(pesel) == 11:
+                            break
                 if name is not '':
                     self.database[str(idx)]['name'] = name
                 if last_name is not '':
@@ -164,8 +187,9 @@ class Database:
                 if pesel is not '':
                     self.database[str(idx)]['pesel'] = pesel
                 self.save_student_database()
+                print('Changed student saved to database.')
         except KeyError:
-            print('Key is not exist!')
+            print('Student not found. Are you sure this ID is correct?')
 
     def delete_student(self, idx):
         try:
@@ -180,7 +204,7 @@ class Database:
                 del self.database[str(idx)]
                 self.save_student_database()
         except KeyError:
-            print('Key is not exist!')
+            print('Student not found. Are you sure this ID is correct?')
 
     def return_new_id(self):
         new_id = 0
@@ -191,4 +215,4 @@ class Database:
 
 
 db = Database()
-db.show_all_students(False)
+db.show_student(2)
